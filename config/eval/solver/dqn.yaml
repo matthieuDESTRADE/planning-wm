@@ -1,0 +1,25 @@
+_target_: dqn_solver.DeepQSolver
+
+batch_size: 512
+planning_horizon: 5
+planning_iterations: 5
+rollout_batch_size: 512
+train_steps: 200
+
+replay_capacity: 100000
+warmup_size: 64
+
+gamma: 0.95
+
+actor_lr: 1.0e-4
+critic_lr: 1.0e-3
+tau: 0.005
+
+exploration_std: 0.2
+
+action_cost: 0.0
+goal_radius: 0.05
+
+hidden_dim: 256
+device: cuda
+seed: 1234

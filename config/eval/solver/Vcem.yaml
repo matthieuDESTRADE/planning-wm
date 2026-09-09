@@ -1,0 +1,19 @@
+_target_: Vcem_solver.VCEMSolver
+model: ???
+batch_size: 1
+
+goal_radius: 0.05
+
+num_samples: 300
+num_random: 0
+var_scale: 1.0
+n_steps: 30
+topk: 30
+
+gamma: 0.99
+tau: 0.7
+
+lr: 1e-3
+hidden_dim: 256
+device: "cuda"
+seed: ${seed}

@@ -1,6 +1,7 @@
 defaults:
   - launcher: local
-  - solver: cem
+  - solver@solver1: rrt 
+#  - solver@solver2: cem_post
   - _self_
 
 world:

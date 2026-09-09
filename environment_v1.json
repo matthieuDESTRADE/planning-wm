@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-09-01T15:47:24.136151",
+  "python": {
+    "version": "3.10.3 (tags/v3.10.3:a342a49, Mar 16 2022, 13:07:40) [MSC v.1929 64 bit (AMD64)]",
+    "version_info": {
+      "major": 3,
+      "minor": 10,
+      "micro": 3
+    },
+    "executable": "C:\\Users\\matth\\Documents\\These\\planning-wm\\.venv\\Scripts\\python.exe",
+    "prefix": "C:\\Users\\matth\\Documents\\These\\planning-wm\\.venv"
+  },
+  "system": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "system": "Windows",
+    "release": "10",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+    "hostname": "MSI"
+  },
+  "packages": {
+    "pip_freeze": "Error getting pip freeze: Command '['C:\\\\Users\\\\matth\\\\Documents\\\\These\\\\planning-wm\\\\.venv\\\\Scripts\\\\python.exe', '-m', 'pip', 'freeze']' returned non-zero exit status 1.",
+    "key_packages": {},
+    "total_packages": 0
+  },
+  "cuda": {
+    "nvidia_smi_output": "NVIDIA GeForce RTX 3070 Laptop GPU, 576.28, 8192 MiB",
+    "driver_version": "576.28"
+  },
+  "git": {
+    "commit_hash": "8edfeb336732b5f3ce7b8b210d0ba370a09e2cac",
+    "branch": "main",
+    "has_uncommitted_changes": true,
+    "uncommitted_changes": "M config/train/lewm.yaml\n?? __pycache__/\n?? convert_checkpoint.py\n?? data/\n?? environment.json\n?? lightning_logs/\n?? outputs/\n?? requirements_frozen.txt",
+    "remote_url": "https://github.com/matthieuDESTRADE/planning-wm.git"
+  },
+  "slurm": null,
+  "environment_variables": {
+    "CUDA_PATH": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4",
+    "CUDA_PATH_V11_8": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8",
+    "CUDA_PATH_V12_3": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.3",
+    "CUDA_PATH_V12_4": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW;.CPL",
+    "PATH": "C:\\Users\\matth\\Documents\\These\\planning-wm\\.venv\\Lib\\site-packages\\cv2\\../../x64/vc17/bin;C:\\Users\\matth\\Documents\\These\\planning-wm\\.venv/Scripts;C:\\Users\\matth\\anaconda3;C:\\Users\\matth\\anaconda3\\Library\\mingw-w64\\bin;C:\\Users\\matth\\anaconda3\\Library\\usr\\bin;C:\\Users\\matth\\anaconda3\\Library\\bin;C:\\Users\\matth\\anaconda3\\Scripts;C:\\Users\\matth\\anaconda3\\bin;C:\\Users\\matth\\anaconda3\\condabin;C:\\Python313\\Scripts;C:\\Python313;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4\\bin;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4\\libnvvp;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;%JAVA_HOME%\\bin;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.3\\bin;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.3\\libnvvp;C:\\Program Files (x86)\\Common Files\\Intel\\Shared Libraries\\redist\\intel64\\compiler;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\bin;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\libnvvp;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0;C:\\Windows\\System32\\OpenSSH;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\WINDOWS\\System32\\OpenSSH;C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn;C:\\Program Files\\dotnet;C:\\Program Files\\Git\\cmd;C:\\Program Files\\MATLAB\\MATLAB Runtime\\v93\\runtime\\win64;C: Python34 Scripts;C:\\Users\\matth\\.venv\\Scripts\\python.exe;C:\\Users\\matth\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\python.exe;C:\\Program Files\\CMake\\bin;C:\\Program Files (x86)\\Windows Kits\\8.1\\Windows Performance Toolkit;C:\\Program Files\\PuTTY;C:\\Program Files\\NVIDIA Corporation\\Nsight Compute 2024.1.0;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit;C:\\Program Files\\NVIDIA Corporation\\NVIDIA App\\NvDLISR;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;C:\\Program Files\\nodejs;C:\\ProgramData\\chocolatey\\bin;C:\\Program Files\\GitHub CLI;C:\\Users\\matth\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\matth\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Program Files\\php-8.1.6-Win32-vs16-x64;C:\\Users\\matth\\.venv\\Scripts\\python.exe;C:\\Users\\matth\\.dotnet\\tools;C:\\Program Files\\Graphviz\\bin;C:\\Program Files\\Graphviz\\bin\\dot.exe;c:\\users\\matth\\appdata\\local\\programs\\python\\python310\\lib\\site-packages;c:\\Users\\matth\\AppData\\Local\\Programs\\Python\\Python310\\Scripts;C:\\Program Files\\Java\\jdk-21\\bin;C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64;C:\\Users\\matth\\anaconda3\\Scripts;C:\\Users\\matth\\anaconda3\\Library\\bin;C:\\Users\\matth\\anaconda3;C:\\Program Files\\Microsoft SDKs\\Windows\\v6.1\\Bin;C:\\Program Files\\Microsoft Visual Studio 9.0\\VC\\Bin;C:\\Program Files\\Microsoft Visual Studio 9.0\\Common7\\IDE;C:\\Users\\matth\\Documents\\MVA\\GeoProc\\Projet\\suitesparse-metis-for-windows\\build\\install\\lib*;C:\\Users\\matth\\Documents\\MVA\\GeoProc\\Projet\\suitesparse-metis-for-windows\\build\\install\\lib*\\lapack_blas_windows;C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4\\bin;C:\\Users\\matth\\AppData\\Roaming\\npm;C:\\Users\\matth\\AppData\\Local\\Microsoft\\WinGet\\Packages\\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe;.",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+  }
+}

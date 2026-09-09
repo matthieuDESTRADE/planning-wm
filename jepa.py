@@ -5,8 +5,10 @@ import torch.nn.functional as F
 from einops import rearrange
 from torch import nn
 
+
 def detach_clone(v):
     return v.detach().clone() if torch.is_tensor(v) else v
+
 
 class JEPA(nn.Module):
 
@@ -49,9 +51,11 @@ class JEPA(nn.Module):
         emb: (B, T, D)
         act_emb: (B, T, A_emb)
         """
+
         preds = self.predictor(emb, act_emb)
         preds = self.pred_proj(rearrange(preds, "b t d -> (b t) d"))
         preds = rearrange(preds, "(b t) d -> b t d", b=emb.size(0))
+
         return preds
 
     ####################
@@ -127,8 +131,6 @@ class JEPA(nn.Module):
 
     def get_cost(self, info_dict: dict, action_candidates: torch.Tensor):
         """ Compute the cost of action candidates given an info dict with goal and initial state."""
-
-        assert "goal" in info_dict, "goal not in info_dict"
 
         device = next(self.parameters()).device
         for k in list(info_dict.keys()):

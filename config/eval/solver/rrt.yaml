@@ -1,0 +1,10 @@
+_target_: rrt_solver.RRTSolver
+model: ???
+max_nodes: 1000 #2000
+goal_radius: 0.005
+sample_scale : 1.0
+max_depth: 5
+batch_size: 128
+sample_size: 128
+device: "cuda"
+seed: ${seed}

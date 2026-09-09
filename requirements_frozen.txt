@@ -1,0 +1,1 @@
+Error getting pip freeze: Command '['C:\\Users\\matth\\Documents\\These\\planning-wm\\.venv\\Scripts\\python.exe', '-m', 'pip', 'freeze']' returned non-zero exit status 1.
