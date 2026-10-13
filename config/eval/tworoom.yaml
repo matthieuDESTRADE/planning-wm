@@ -1,6 +1,6 @@
 defaults:
   - launcher: local
-  - solver@solver1: Vcem 
+  - solver@solver1: rrt
 #  - solver@solver2: cem_post
   - _self_
 

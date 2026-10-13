@@ -528,10 +528,11 @@ class MCTSSolver:
             distances_to_goal = distances_to_goal.reshape(self.batch_size, self.sample_size)
 
             values = np.min(distances_to_goal, axis = 1)
+            idx_action = np.argmin(distances_to_goal, axis = 1)
             
-            next_state = next_state[:, 0]
-            candidate_action = candidate_action[:, 0]
-
+            batch_idx = np.arange(self.batch_size)
+            next_state = next_state[batch_idx, idx_action]
+            candidate_action = candidate_action[batch_idx, idx_action]
 
             num_merges = 0
             for i in range(self.batch_size): # To be vectorized

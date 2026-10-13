@@ -182,8 +182,8 @@ class VCEMSolver:
 
     def criterion(self, info_dict: dict):
         """Compute the cost between predicted embeddings and goal embeddings."""
-        pred_emb = info_dict['predicted_emb']  # (B,S, T-1, dim)
-        goal_emb = info_dict['goal_emb']  # (B, S, T, dim)
+        pred_emb = info_dict['predicted_Vemb']  # (B,S, T-1, dim)
+        goal_emb = info_dict['goal_Vemb']  # (B, S, T, dim)
 
         goal_emb = goal_emb[..., -1:, :].expand_as(pred_emb)
 
@@ -325,25 +325,34 @@ class VCEMSolver:
                 with torch.no_grad():
                     expanded_infos = self.model.rollout(expanded_infos, candidates)
 
-                    dones = (torch.norm(expanded_infos['predicted_emb'][:,:,:-1]-expanded_infos['goal_emb'], dim=-1)<=self.goal_radius).float()
-
                 expanded_infos['goal_Vemb'] = self.value_embedder(expanded_infos['goal_emb'])
                 expanded_infos['predicted_Vemb'] = self.value_embedder(expanded_infos['predicted_emb'])
 
-                costs = self.criterion(expanded_infos)
-
                 pred_emb = expanded_infos['predicted_Vemb']  
-                goal_emb = expanded_infos['goal_Vemb']
 
+                ## compute loss with goals
+                goal_emb = expanded_infos['goal_Vemb']
                 V = -torch.norm(pred_emb[:,:,:-1] - goal_emb.unsqueeze(2), dim = -1)
                 V_next = -torch.norm(pred_emb[:,:,1:] - goal_emb.unsqueeze(2), dim = -1).detach()
+                dones = (torch.norm(expanded_infos['predicted_emb'][:,:,:-1]-expanded_infos['goal_emb'], dim=-1)<=self.goal_radius).float()
 
                 loss_V = l_tau_2(self.tau, dones-1 + self.gamma*V_next - V).mean()
                 print(V[0,0])
 
+
+                ## compute loss with last state
+                goal_emb = expanded_infos['predicted_Vemb'][:,:,-1]
+                V = -torch.norm(pred_emb[:,:,:-1] - goal_emb.unsqueeze(2), dim = -1)
+                V_next = -torch.norm(pred_emb[:,:,1:] - goal_emb.unsqueeze(2), dim = -1).detach()
+                dones = (torch.norm(expanded_infos['predicted_emb'][:,:,:-1]-expanded_infos['predicted_emb'][:,:,-1:], dim=-1)<=self.goal_radius).float()
+
+                loss_V += l_tau_2(self.tau, dones-1 + self.gamma*V_next - V).mean()
+
                 self.value_optimizer.zero_grad(set_to_none=True)
                 loss_V.backward()
                 self.value_optimizer.step()
+
+                costs = self.criterion(expanded_infos)
 
                 assert isinstance(costs, torch.Tensor), (
                     f'Expected cost to be a torch.Tensor, got {type(costs)}'

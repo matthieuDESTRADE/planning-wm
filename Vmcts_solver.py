@@ -16,6 +16,33 @@ from PIL import Image, ImageDraw
 
 from latent_coord_decoder import load_decoder_checkpoint
 
+class MLP(torch.nn.Module):
+    def __init__(self, input_dim, output_dim, hidden_dim=256):
+        super().__init__()
+        self.net = torch.nn.Sequential(
+            torch.nn.Linear(input_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, output_dim),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class ValueHead(torch.nn.Module):
+    """Embedder to goal-conditioned value function V(s,g) = -||E(s)-E(g)||"""
+
+    def __init__(self, state_dim, hidden_dim=256):
+        super().__init__()
+        self.net = MLP(state_dim, state_dim, hidden_dim)
+
+    def forward(self, state):
+        return self.net(state).squeeze(-1)
+
+
+def l_tau_2(tau, x):
+    return torch.where(x < 0, 1 - tau, tau) * x**2
 
 @dataclass
 class MCTS:
@@ -39,7 +66,7 @@ class MCTS:
         self.childrens[parent].append(self.size)
         self.size += 1
         self.merges = np.append(self.merges, False)
-        self.visits = np.append(self.visits[:-1], [0, 1])
+        self.visits = np.append(self.visits[:-1], [0, self.visits[-1]])
         self.values = np.append(self.values, 0)
         self.set_values(self.size-1, value)
 
@@ -48,6 +75,8 @@ class MCTS:
         self.visits[state_id] += 1
         if self.parents[state_id]>=0:
             self.set_values(self.parents[state_id], value - self.action_cost)
+        else:
+            self.visits[self.parents[state_id]] += 1
 
 
     def set_depth(self, idx, depth):
@@ -55,7 +84,7 @@ class MCTS:
         for child in self.childrens[idx]:
             self.set_depth(child, depth+1)
 
-class MCTSSolver:
+class VMCTSSolver:
     """A latent-space MCTS-style planner compatible with stable_worldmodel Solver.
 
     The solver keeps a tree rooted at the current latent state, samples random latent
@@ -447,15 +476,61 @@ class MCTSSolver:
             # Stack tree states: (n_tree_nodes, latent_dim)
             tree_states = tree.states
 
-            valid_idxs = np.flatnonzero((tree.depths + 1 <= self.max_depth) & (~tree.merges))
+            valid_idxs = np.flatnonzero((tree.depths + 1 <= self.max_depth))
+            local_idx = {
+                node_idx: i
+                for i, node_idx in enumerate(valid_idxs)
+            }
 
-            logits = tree.values[valid_idxs]/tree.visits[valid_idxs] + self.exploration_coef * np.sqrt(np.log(tree.visits[tree.parents[valid_idxs]])/tree.visits[valid_idxs])
-            proba = np.exp(logits - logits.max())
-            proba /= proba.sum()
-            proba = proba.reshape(-1)            
-            
-            #nearest_idxs = valid_idxs[self.rng.integers(0, len(valid_idxs), size=self.batch_size)]
-            nearest_idxs = self.rng.choice(valid_idxs,size=self.batch_size, replace=True, p=proba)
+            parents = tree.parents[valid_idxs]
+            depths = tree.depths[valid_idxs]
+            visits = tree.visits[valid_idxs]
+            values = tree.values[valid_idxs]
+            valid_mask = np.zeros(len(tree.states), dtype=bool)
+            valid_mask[valid_idxs] = True
+            num_children = np.array([
+                sum(valid_mask[child] for child in tree.childrens[c])
+                for c in valid_idxs
+            ])  # TO BE PARALLELIZED
+
+            parent_visits = tree.visits[parents]
+
+            temp = 1.0
+            logits = (values / visits
+                + self.exploration_coef * (np.sqrt(np.log(parent_visits) / visits)
+                + 0 * np.sqrt(np.log(parent_visits) / (num_children + 1)))) / temp
+
+            # --- local probability P(child | parent) ---
+            local_log_proba = np.zeros(len(depths))
+            for p in np.unique(parents):
+                idxs_p = np.flatnonzero(parents == p)
+
+                l = logits[idxs_p]
+                l = l - l.max()
+
+                log_denom = np.log(np.exp(l).sum())
+                local_log_proba[idxs_p] = l - log_denom
+
+            # --- probability of a leaf = product of local (per-depth) probabilities
+            #     along its root-to-leaf branch, done in log-space for stability ---
+            path_log_proba = np.zeros(len(depths))
+            order = np.argsort(depths)  # ensures every parent is resolved before its children
+            for idx in order:
+                p = parents[idx]
+                p_local = local_idx.get(p, -1)
+
+                path_log_proba[idx] = (
+                    local_log_proba[idx]
+                    if p_local < 0
+                    else path_log_proba[p_local] + local_log_proba[idx]
+                )
+
+            # --- sample among the valid leaves using their branch probability ---
+            leaf_idxs = np.flatnonzero(num_children == 0)
+            leaf_log_proba = path_log_proba[leaf_idxs]
+            proba = np.exp(leaf_log_proba)
+
+            nearest_idxs = self.rng.choice(leaf_idxs, size=self.batch_size, replace=True, p=proba)
 
             # Parent depths
             parent_depths = tree.depths[nearest_idxs]
@@ -528,10 +603,11 @@ class MCTSSolver:
             distances_to_goal = distances_to_goal.reshape(self.batch_size, self.sample_size)
 
             values = np.min(distances_to_goal, axis = 1)
+            idx_action = np.argmin(distances_to_goal, axis = 1)
             
-            next_state = next_state[:, 0]
-            candidate_action = candidate_action[:, 0]
-
+            batch_idx = np.arange(self.batch_size)
+            next_state = next_state[batch_idx, idx_action]
+            candidate_action = candidate_action[batch_idx, idx_action]
 
             num_merges = 0
             for i in range(self.batch_size): # To be vectorized

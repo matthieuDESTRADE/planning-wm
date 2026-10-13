@@ -194,8 +194,8 @@ class RRTSolver:
 
         self._load_decoder()
         projected: list[np.ndarray] = []
-        for node in tree:
-            xy = self._latent_to_xy(node.state)
+        for state in tree.states:
+            xy = self._latent_to_xy(state)
             projected.append(np.asarray(xy, dtype=np.float32).reshape(-1)[:2])
         goal_xy = None
         if goal_state is not None:
@@ -207,11 +207,11 @@ class RRTSolver:
         image = Image.fromarray(rgb.astype(np.uint8))
         draw = ImageDraw.Draw(image)
 
-        for idx, node in enumerate(tree):
-            if node.parent is None:
+        for idx, state in enumerate(tree.states):
+            if tree.parents[idx] == -1:
                 continue
-            if 0 <= node.parent < len(tree):
-                a = points_2d[node.parent]
+            if 0 <= tree.parents[idx] < len(tree.states):
+                a = points_2d[tree.parents[idx]]
                 b = points_2d[idx]
                 draw.line([a, b], fill=(255, 80, 80), width=2)
 
@@ -399,6 +399,7 @@ class RRTSolver:
         env_idx: int | None = None,
     ) -> torch.Tensor:
 
+
         root_state = np.asarray(
             self._state_from_info(info_dict),
             dtype=np.float32,
@@ -434,6 +435,8 @@ class RRTSolver:
                 1.0,
                 size=(self.batch_size, *goal_state.shape),
             )
+
+            #z_rand[-1] = goal_state ##OPTIONNEL
 
             # Stack tree states: (n_tree_nodes, latent_dim)
             tree_states = tree.states
@@ -513,17 +516,30 @@ class RRTSolver:
                             z_rand.repeat(self.sample_size,0) - next_state, #goal_state - next_state,
                             axis=-1,
                         )
+                        
+            distances_to_goal = np.linalg.norm(
+                            goal_state - next_state, #goal_state - next_state,
+                            axis=-1,
+                        )
 
             next_state = next_state.reshape(self.batch_size, self.sample_size, -1)
             candidate_action = candidate_action.reshape(self.batch_size, self.sample_size, -1)
             distances_to_sampled = distances_to_sampled.reshape(self.batch_size, self.sample_size)
+            distances_to_goal = distances_to_goal.reshape(self.batch_size, self.sample_size)
 
             closest_idx = np.argmin(distances_to_sampled, axis = 1)
+            closest_idx_goal = np.argmin(distances_to_goal, axis = 1)
             
             batch_idx = np.arange(self.batch_size)
+            next_state_goal = next_state[batch_idx, closest_idx_goal] ###
+            candidate_action_goal = candidate_action[batch_idx, closest_idx_goal] ###
             next_state = next_state[batch_idx, closest_idx]
             candidate_action = candidate_action[batch_idx, closest_idx]
 
+            candidate_action = np.concatenate((candidate_action, candidate_action_goal), axis=0)
+            next_state = np.concatenate((next_state, next_state_goal), axis=0)
+            nearest_idxs = np.concatenate((nearest_idxs, nearest_idxs), axis=0)
+            next_depths = np.concatenate((next_depths, next_depths), axis=0)
 
             num_merges = 0
             for i in range(self.batch_size): # To be vectorized
@@ -619,7 +635,7 @@ class RRTSolver:
         for env_idx in range(total_envs):
             env_info = {k: self._select(v, env_idx) for k, v in info_dict.items()}
             env_init = None if init_action is None else self._select(init_action, env_idx)
-            actions.append(self._plan_single(env_info, env_init, env_idx=env_idx))
+            actions.append(self._plan_single(env_info, env_init, env_idx=info_dict['idxs'][env_idx]))
 
         actions_tensor = torch.stack(actions, dim=0).to(self.device)
 

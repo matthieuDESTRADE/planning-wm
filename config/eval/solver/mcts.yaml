@@ -2,9 +2,9 @@ _target_: mcts_solver.MCTSSolver
 model: ???
 max_nodes: 1000
 goal_radius: 0.005
-exploration_coef : 2.0
+exploration_coef : 1.0
 action_cost : 0.5
 max_depth: 5
-batch_size: 128
+batch_size: 16
 device: "cuda"
 seed: ${seed}

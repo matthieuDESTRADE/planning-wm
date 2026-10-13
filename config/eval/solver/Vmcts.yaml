@@ -1,0 +1,11 @@
+_target_: Vmcts_solver.VMCTSSolver
+model: ???
+max_nodes: 1000
+goal_radius: 0.005
+exploration_coef : 1.0
+action_cost : 0
+max_depth: 5
+sample_size: 1
+batch_size: 128
+device: "cuda"
+seed: ${seed}
